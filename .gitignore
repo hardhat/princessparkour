@@ -1,0 +1,17 @@
+/art/
+/.vscode
+/obj/
+*.o
+*.cdb
+*.rel
+*.ihx
+*.bin
+*.sym
+*.map
+*.exe
+*.noi
+*.lst
+*.adb
+*.rst
+/main.asm
+/s
