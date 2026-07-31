@@ -90,6 +90,8 @@ void initialize_graphics() {
     gfx_palette_load(&ctx, idlerun_palette, 64, IDLERUN_PALETTE_BASE);
     const uint16_t solid_color[2]={0xf800,0x07e0}; // Red and Green
     gfx_palette_load(&ctx,solid_color,4,254);
+    const uint16_t black[1]={0x0};
+    gfx_palette_load(&ctx,black,2,0);
     for(int x=5;x<10;x++) gfx_tilemap_place(&ctx,255,0,x,7);
     debug_log("Loading tiles");
     gfx_tileset_load(&ctx, idlerun_tiles, idlerun_tiles_len, &options0);
@@ -267,6 +269,11 @@ int main(int argc, char *argv[]) {
 
     printf("Starting game...\n");
     initialize_graphics();
+    
+    /* Initialize the keyboard by setting it to raw and non-blocking */
+    void* arg = (void*) (KB_READ_NON_BLOCK | KB_MODE_RAW);
+    ioctl(DEV_STDIN, KB_CMD_SET_MODE, arg);
+
     show_tutorial_map();
 
     // Main loop

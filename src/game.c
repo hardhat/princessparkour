@@ -20,13 +20,13 @@ void game_update() {
     player.x += player.dx;
     player.y += player.dy;
     // Additional game update code here
-    player.frame = (player.frame+1) % 8; // Cycle through animation frames
+    player.frame = ((player.frame)+1) % 32; // Cycle through animation frames
 }
 
 void game_render() {
     reset_sprite();
     // Render game graphics here (anchor in bottom center)
-    int base_frame = 16 + (player.dx==0 ? 0 : 8) + 2*(player.frame>>1);  // Idle or running frames
+    int base_frame = 16 + (player.dx==0 ? 0 : 8) + 2*(player.frame>>3);  // Idle or running frames
     if(player.dx < 0) {
         // 2x3 sprite frames for running left
         add_sprite(player.x-16, player.y-48, base_frame+1, SPRITE_FLAG_FLIP_X);

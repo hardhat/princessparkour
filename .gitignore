@@ -13,5 +13,7 @@
 *.lst
 *.adb
 *.rst
+*.ztp
+*.zts
 /main.asm
 /s
