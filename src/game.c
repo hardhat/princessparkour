@@ -9,7 +9,7 @@ void game_init() {
     player.y = 240-64;
     player.dx = 0;
     player.dy = 0;
-    player.speed = 8;
+    player.speed = 4;
     player.health = 100;
     player.score = 0;
     player.frame = 0;
