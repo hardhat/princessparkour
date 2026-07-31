@@ -9,6 +9,7 @@
 #include<zos_time.h>
 #include<zos_vfs.h>
 #include<zos_keyboard.h>
+#include<zos_video.h>
 #include<zvb_hardware.h>
 #include<zvb_gfx.h>
 #include<zvb_sprite.h>
