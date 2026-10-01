@@ -22,4 +22,6 @@ Zeal computer and type: ./ppar.bin
 
 By hardhatpsp
 
-Tools: gimp, aseprite, vs code, sdcc and thanks to the Zeal 8-bit team.
+Tools: gimp, aseprite, tiled, V.S. Code, SDCC and thanks to the Zeal 8-bit team.
+
+Art mostly hand drawn based on https://rauchen.itch.io/the-dude pose references and a little help from https://pixellab.ai

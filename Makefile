@@ -6,7 +6,7 @@ IMG=img/idlerun.zts
 CC=sdcc
 CFLAGS=-mz80 --std-c2x -c -I $(ZOS_PATH)/kernel_headers/sdcc/include/ -I $(ZVB_SDK_PATH)/include --codeseg TEXT --debug
 AS=sdasz80 -o -l -s
-OBJCOPY=sdobjcopy
+OBJCOPY=objcopy
 LD=sdldz80
 LDFLAGS=-n -y -mjwx -i -b _HEADER=0x4000 -k $(ZOS_PATH)/kernel_headers/sdcc/lib -l z80 $(ZOS_LDFLAGS)
 ZOS_LIBS=-k $(ZVB_SDK_PATH)/lib -l zvb_sound -l zvb_gfx
