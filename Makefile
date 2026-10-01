@@ -33,9 +33,9 @@ obj/%.rel: src/%.asm
 img/%.zts: img/%.gif
 	$(ZVB_SDK_PATH)/tools/zeal2gif/gif2zeal.py -z lz -i $<
 
-obj/game.rel: src/game.c src/game.h src/main.h
+obj/game.rel: src/game.c src/game.h src/main.h map/tutorial_map.h
 obj/menu.rel: src/menu.c src/menu.h src/game.h
-obj/main.rel: src/main.c src/game.h src/menu.h src/img.h map/tutorial_map.h
+obj/main.rel: src/main.c src/game.h src/menu.h src/img.h
 obj/img.rel: src/img.asm $(IMG)
 
 clean:

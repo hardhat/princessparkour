@@ -28,7 +28,6 @@
 #include "game.h"
 #include "menu.h"
 #include "img.h"
-#include "../map/tutorial_map.h"
 
 gfx_context ctx;
 uint8_t sprite_count=0;
@@ -108,11 +107,6 @@ void show_map(uint8_t *map,uint8_t width,uint8_t height)
     {
         gfx_tilemap_load(&ctx, &map[width*y], width, layer, 0, y);
     }
-}
-
-void show_tutorial_map(void)
-{
-    show_map(map_data,MAP_WIDTH,MAP_HEIGHT);
 }
 
 void set_game_state(enum GameState new_state) {

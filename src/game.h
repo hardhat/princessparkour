@@ -8,16 +8,20 @@ enum PlayerAnimation {
     PLAYER_ANIMATION_IDLE,
     PLAYER_ANIMATION_RUN,
     PLAYER_ANIMATION_JUMP,
-    PLAYER_ANIMATION_ROLL
+    PLAYER_ANIMATION_ROLL,
+    PLAYER_ANIMATION_HANG,
 };
 
 struct Player {
     int x;
     int y;
-    int dx,dy;
+    int vx, vy; // velocity in subpixels (1/16 pixel) per frame
+    int sx, sy; // subpixel remainder of position
+    bool on_ground;
+    uint8_t coyote_timer; // frames left to jump after walking off a ledge
+    uint8_t jump_buffer;  // frames left to honor an early jump press
     bool facing_right;
     enum PlayerAnimation animation;
-    int speed;
     int health;
     int score;
     int frame; // current frame of the animation
