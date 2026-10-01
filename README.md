@@ -20,6 +20,10 @@ time and you will be crowned as ruler.
 Currently in a single binary, so just transfer it to your
 Zeal computer and type: ./ppar.bin
 
+## Controls:
+
+Move with WASD or arrow keys.  Down = roll, Up = jump. ESC to quit.
+
 ## Credits
 
 By hardhatpsp
