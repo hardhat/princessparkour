@@ -2,6 +2,8 @@
 
 A running and jumping game for Zeal 8-bit Computer.
 
+<img src="screenshots/ppar1.png" alt="Screenshot from Princess Parkour, a running and jumping game, showing Princess Jade navigating a perilous underground labyrinth beneath the palace. The dark, trap-filled setting creates an adventurous, tense mood. No text is visible.">
+
 You are Princess Jade, trapped in the depths of the labarinth
 deep beneath the palace, by the Sorcerous Saphire of the
 nefarious Crimson Scorpions, the shadowy group conspiring to

@@ -20,6 +20,9 @@ struct Player {
     bool on_ground;
     uint8_t coyote_timer; // frames left to jump after walking off a ledge
     uint8_t jump_buffer;  // frames left to honor an early jump press
+    uint8_t climb_timer;  // frames since grabbing a ledge
+    int climb_from_x;     // x when the ledge was grabbed
+    int ledge_x, ledge_y; // where the player ends up standing after the climb
     bool facing_right;
     enum PlayerAnimation animation;
     int health;

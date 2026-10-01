@@ -4,6 +4,15 @@
 
 #define TILE_SIZE 16
 #define PLAYER_MAX_HITBOX_HEIGHT 32
+#define PLAYER_HITBOX_INSET 8   // arms stick out past the body
+
+// Ledge grab: distance from feet up to the hands in the hang frame
+#define HANG_HAND_OFFSET 44
+#define GRAB_RANGE 8
+#define LEDGE_HANG_TICKS 12
+#define LEDGE_CLIMB_FRAME_TICKS 8
+#define LEDGE_CLIMB_FRAMES 3
+#define LEDGE_CLIMB_TICKS (LEDGE_HANG_TICKS + LEDGE_CLIMB_FRAMES * LEDGE_CLIMB_FRAME_TICKS)
 
 // Physics values are in subpixels (1/16 pixel) per frame at 60 FPS
 #define SUBPIXEL 16
@@ -65,8 +74,8 @@ const struct Frame roll_frames[] = {
 
 const struct Frame hang_frames[] = {
     { .base = 0x64, .width = 2, .height = 3 },
-    { .base = 0x50, .width = 2, .height = 3 },
-    { .base = 0x52, .width = 2, .height = 3 },
+    { .base = 0x4e, .width = 2, .height = 3 },
+    { .base = 0x4c, .width = 2, .height = 3 },
     { .base = 0x4a, .width = 2, .height = 2 },
 };
     
@@ -92,7 +101,7 @@ const struct Animation player_animation[] = {
         .animation_timer = 64 // example value in ms
     },
     [PLAYER_ANIMATION_HANG] = {
-        .frame_count = 2,
+        .frame_count = 4,
         .frames = hang_frames,
         .animation_timer = 256 // example value in ms
     }
@@ -124,13 +133,18 @@ static bool rect_collides(int left, int top, int width, int height) {
 }
 
 // Player position is bottom-center of the current frame
+static int hitbox_half_width(void) {
+    const struct Frame* f = &player_animation[player.animation].frames[player.frame];
+    return f->width * (TILE_SIZE / 2) - PLAYER_HITBOX_INSET;
+}
+
 static bool player_collides(int x, int y) {
     const struct Frame* f = &player_animation[player.animation].frames[player.frame];
-    int width = f->width * TILE_SIZE;
+    int half = hitbox_half_width();
     int height = f->height * TILE_SIZE;
     // Top row of 3-tile-tall frames is empty space above the head
     if(height > PLAYER_MAX_HITBOX_HEIGHT) height = PLAYER_MAX_HITBOX_HEIGHT;
-    return rect_collides(x - width / 2, y - height, width, height);
+    return rect_collides(x - half, y - height, half * 2, height);
 }
 
 // Step one pixel at a time so the player stops flush against walls
@@ -180,6 +194,7 @@ void game_init() {
     player.on_ground = false;
     player.coyote_timer = 0;
     player.jump_buffer = 0;
+    player.climb_timer = 0;
     held_left = held_right = held_down = held_jump = false;
     player.health = 100;
     player.score = 0;
@@ -197,7 +212,64 @@ static void set_animation(enum PlayerAnimation animation) {
     }
 }
 
+// Grab a ledge when falling against a wall whose top corner is within reach of the hands
+static bool try_grab_ledge(void) {
+    int dir;
+    if(player.on_ground || player.vy < 0) return false;
+    if(held_right && player.facing_right) dir = 1;
+    else if(held_left && !player.facing_right) dir = -1;
+    else return false;
+    if(!player_collides(player.x + dir, player.y)) return false;
+
+    int half = hitbox_half_width();
+    int wall_x = dir > 0 ? player.x + half : player.x - half - 1;
+    if(wall_x < 0 || wall_x >= MAP_WIDTH * TILE_SIZE) return false;
+    int hand_y = player.y - HANG_HAND_OFFSET;
+    if(hand_y + GRAB_RANGE < TILE_SIZE) return false;
+    uint8_t tx = wall_x / TILE_SIZE;
+    uint8_t ty = (hand_y + GRAB_RANGE) / TILE_SIZE;
+    if(ty >= MAP_HEIGHT || !tile_solid(tx, ty) || tile_solid(tx, ty - 1)) return false;
+
+    int ledge_y = ty * TILE_SIZE;
+    int hang_y = ledge_y + HANG_HAND_OFFSET;
+    int ledge_x = dir > 0 ? tx * TILE_SIZE + half : (tx + 1) * TILE_SIZE - half;
+    if(player_collides(player.x, hang_y) || player_collides(ledge_x, ledge_y)) return false;
+
+    player.y = hang_y;
+    player.vx = player.vy = 0;
+    player.sx = player.sy = 0;
+    player.climb_timer = 0;
+    player.climb_from_x = player.x;
+    player.ledge_x = ledge_x;
+    player.ledge_y = ledge_y;
+    set_animation(PLAYER_ANIMATION_HANG);
+    return true;
+}
+
+// Hang briefly, then step through the climb frames while easing onto the ledge
+static void update_climb(void) {
+    player.climb_timer++;
+    if(player.climb_timer >= LEDGE_CLIMB_TICKS) {
+        player.x = player.ledge_x;
+        player.y = player.ledge_y;
+        player.on_ground = true;
+        player.jump_buffer = 0;
+        set_animation(PLAYER_ANIMATION_IDLE);
+        return;
+    }
+    uint8_t frame = player.climb_timer < LEDGE_HANG_TICKS ? 0 :
+        1 + (player.climb_timer - LEDGE_HANG_TICKS) / LEDGE_CLIMB_FRAME_TICKS;
+    int from_y = player.ledge_y + HANG_HAND_OFFSET;
+    player.frame = frame;
+    player.x = player.climb_from_x + (player.ledge_x - player.climb_from_x) * frame / LEDGE_CLIMB_FRAMES;
+    player.y = from_y + (player.ledge_y - from_y) * frame / LEDGE_CLIMB_FRAMES;
+}
+
 void game_update() {
+    if(player.animation == PLAYER_ANIMATION_HANG) {
+        update_climb();
+        return;
+    }
     bool rolling = held_down && player.on_ground;
     int accel = player.on_ground ? GROUND_ACCEL : AIR_ACCEL;
     int friction = player.on_ground ? GROUND_FRICTION : AIR_FRICTION;
@@ -239,6 +311,7 @@ void game_update() {
     if(player.vy > MAX_FALL_SPEED) player.vy = MAX_FALL_SPEED;
 
     move_player();
+    if(try_grab_ledge()) return;
 
     if(!player.on_ground) {
         set_animation(PLAYER_ANIMATION_JUMP);
